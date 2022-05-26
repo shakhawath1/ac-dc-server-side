@@ -31,7 +31,7 @@ async function run() {
             res.send(products);
         });
 
-        // get one product
+        // get one product by id
         app.get('/product/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
@@ -39,20 +39,31 @@ async function run() {
             res.send(product);
         });
 
-        // add prder
+        // get order
+        app.get('/order/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email: email };
+            const orders = await orderCollection.find(query).toArray();
+            res.send(orders);
+        });
+
+        // // get all order
+        // app.get('/order', async (req, res) => {
+        //     const query = {};
+        //     const cursor = orderCollection.find(query);
+        //     const orders = await cursor.toArray();
+        //     res.send(orders);
+        // });
+
+
+        // add order
         app.post('/order', async (req, res) => {
             const order = req.body;
             const result = await orderCollection.insertOne(order);
             return res.send({ success: true, result });
         });
 
-        // get order
-        app.get('/order', async (req, res) => {
-            const query = {};
-            const cursor = orderCollection.find(query);
-            const orders = await cursor.toArray();
-            res.send(orders);
-        });
+
 
         // put users
         app.put('/user/:email', async (req, res) => {
