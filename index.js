@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const jwt = require('jsonwebtoken');
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -21,14 +22,14 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 async function run() {
     try {
         await client.connect();
-        const productCollecton = client.db("ac-dc").collection("products");
-        const orderCollecton = client.db("ac-dc").collection("orders");
-        const userCollecton = client.db("ac-dc").collection("users");
+        const productCollection = client.db("ac-dc").collection("products");
+        // const orderCollection = client.db("ac-dc").collection("orders");
+        const userCollection = client.db("ac-dc").collection("users");
 
         // all products API
         app.get('/product', async (req, res) => {
             const query = {};
-            const cursor = productCollecton.find(query);
+            const cursor = productCollection.find(query);
             const products = await cursor.toArray();
             res.send(products);
         });
@@ -37,7 +38,7 @@ async function run() {
         app.get('/product/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
-            const product = await productCollecton.findOne(query);
+            const product = await productCollection.findOne(query);
             res.send(product);
         });
 
@@ -51,8 +52,9 @@ async function run() {
             const updateDoc = {
                 $set: user,
             };
-            const result = await userCollecton.upsertOne(filter, updateDoc, options);
-            res.send(result);
+            const result = await userCollection.updateOne(filter, updateDoc, options);
+            const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '3h' })
+            res.send({ result, token });
         })
 
 
