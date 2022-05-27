@@ -27,7 +27,7 @@ const verifyJWT = (req, res, next) => {
         if (err) {
             return res.status(403).send({ message: 'Forbidden access' })
         }
-        req.decoded = decoded();
+        req.decoded = decoded;
         next();
     });
 };
@@ -57,18 +57,24 @@ async function run() {
 
         // // get all order
         app.get('/order', verifyJWT, async (req, res) => {
-            const query = {};
-            const cursor = orderCollection.find(query);
-            const orders = await cursor.toArray();
-            res.send(orders);
+            // const query = {};
+            // const cursor = orderCollection.find(query);
+            const orders = await orderCollection.find().toArray();
+            res.send(orders.reverse());
         });
 
         // get order by user-email
         app.get('/order/:email', verifyJWT, async (req, res) => {
             const email = req.params.email;
-            const query = { email: email };
-            const orders = await orderCollection.find(query).toArray();
-            res.send(orders);
+            const decodedEmail = req.decoded.email;
+            if (email === decodedEmail) {
+                const query = { email: email };
+                const orders = await orderCollection.find(query).toArray();
+                return res.send(orders.reverse());
+            }
+            else {
+                return res.status(403).send({ message: 'Forbidden access' })
+            }
         });
 
         // add order
@@ -97,7 +103,7 @@ async function run() {
                 $set: user,
             };
             const result = await userCollection.updateOne(filter, updateDoc, options);
-            const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '3h' })
+            const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '3000000000h' })
             res.send({ result, token });
         })
 
