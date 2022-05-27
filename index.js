@@ -16,7 +16,7 @@ const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster
 
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
-// verify JWT token
+// verify JWT token function
 const verifyJWT = (req, res, next) => {
     const authHeader = req.headers.authorization;
     if (!authHeader) {
@@ -79,7 +79,7 @@ async function run() {
         app.post('/order', verifyJWT, async (req, res) => {
             const order = req.body;
             const result = await orderCollection.insertOne(order);
-            return res.send({ success: true, result });
+            res.send({ success: true, result });
         });
 
         // delete
@@ -97,17 +97,29 @@ async function run() {
         });
 
 
-
+        app.get('/admin/:email', verifyJWT, async (req, res) => {
+            const email = req.params.email;
+            const user = await userCollection.findOne({ email: email });
+            const isAdmin = user.role === 'admin';
+            res.send({ admin: isAdmin });
+        });
 
         // add admin
-        app.put('/user/admin/:email', async (req, res) => {
+        app.put('/user/admin/:email', verifyJWT, async (req, res) => {
             const email = req.params.email;
-            const filter = { email: email };
-            const updateDoc = {
-                $set: { role: 'admin' },
-            };
-            const result = await userCollection.updateOne(filter, updateDoc);
-            res.send(result);
+            const requester = req.decoded.email;
+            const requesterAccount = await userCollection.findOne({ email: requester });
+            if (requesterAccount.role === 'admin') {
+                const filter = { email: email };
+                const updateDoc = {
+                    $set: { role: 'admin' },
+                };
+                const result = await userCollection.updateOne(filter, updateDoc);
+                res.send(result);
+            }
+            else {
+                res.status(403).send({ message: 'Forbidden access' })
+            }
         });
 
 
@@ -121,7 +133,7 @@ async function run() {
                 $set: user,
             };
             const result = await userCollection.updateOne(filter, updateDoc, options);
-            const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '3000000000h' })
+            const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '3000h' })
             res.send({ result, token });
         });
 
