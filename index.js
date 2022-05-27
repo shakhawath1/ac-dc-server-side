@@ -55,6 +55,13 @@ async function run() {
             res.send(product);
         });
 
+        // add product
+        app.post('/product', async (req, res) => {
+            const newCar = req.body;
+            const products = await productCollection.insertOne(newCar);
+            res.send(products);
+        });
+
         // // get all order
         app.get('/order', verifyJWT, async (req, res) => {
             const orders = await orderCollection.find().toArray();
