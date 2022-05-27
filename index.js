@@ -13,8 +13,24 @@ app.use(cors());
 app.use(express.json());
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.ut3bs.mongodb.net/?retryWrites=true&w=majority`;
+
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
+// verify JWT token
+const verifyJWT = (req, res, next) => {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+        return res.status(401).send({ message: 'Unauthorized access' })
+    }
+    const token = authHeader.split(' ')[1];
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function (err, decoded) {
+        if (err) {
+            return res.status(403).send({ message: 'Forbidden access' })
+        }
+        req.decoded = decoded();
+        next();
+    });
+};
 
 async function run() {
     try {
@@ -40,7 +56,7 @@ async function run() {
         });
 
         // // get all order
-        app.get('/order', async (req, res) => {
+        app.get('/order', verifyJWT, async (req, res) => {
             const query = {};
             const cursor = orderCollection.find(query);
             const orders = await cursor.toArray();
@@ -48,7 +64,7 @@ async function run() {
         });
 
         // get order by user-email
-        app.get('/order/:email', async (req, res) => {
+        app.get('/order/:email', verifyJWT, async (req, res) => {
             const email = req.params.email;
             const query = { email: email };
             const orders = await orderCollection.find(query).toArray();
@@ -63,7 +79,7 @@ async function run() {
         });
 
         // delete
-        app.delete('/order/:id', async (req, res) => {
+        app.delete('/order/:id', verifyJWT, async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
             const orders = await orderCollection.deleteOne(query);
