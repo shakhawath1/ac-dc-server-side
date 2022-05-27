@@ -39,7 +39,15 @@ async function run() {
             res.send(product);
         });
 
-        // get order
+        // // get all order
+        app.get('/order', async (req, res) => {
+            const query = {};
+            const cursor = orderCollection.find(query);
+            const orders = await cursor.toArray();
+            res.send(orders);
+        });
+
+        // get order by user-email
         app.get('/order/:email', async (req, res) => {
             const email = req.params.email;
             const query = { email: email };
@@ -47,22 +55,12 @@ async function run() {
             res.send(orders);
         });
 
-        // // get all order
-        // app.get('/order', async (req, res) => {
-        //     const query = {};
-        //     const cursor = orderCollection.find(query);
-        //     const orders = await cursor.toArray();
-        //     res.send(orders);
-        // });
-
-
         // add order
         app.post('/order', async (req, res) => {
             const order = req.body;
             const result = await orderCollection.insertOne(order);
             return res.send({ success: true, result });
         });
-
 
 
         // put users
