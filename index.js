@@ -62,6 +62,14 @@ async function run() {
             return res.send({ success: true, result });
         });
 
+        // delete
+        app.delete('/order/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const orders = await orderCollection.deleteOne(query);
+            res.send(orders);
+        });
+
 
         // put users
         app.put('/user/:email', async (req, res) => {
