@@ -44,7 +44,7 @@ async function run() {
             const query = {};
             const cursor = productCollection.find(query);
             const products = await cursor.toArray();
-            res.send(products);
+            res.send(products.reverse());
         });
 
         // get one product by id
@@ -57,12 +57,21 @@ async function run() {
 
         // add product
         app.post('/product', async (req, res) => {
-            const newCar = req.body;
-            const products = await productCollection.insertOne(newCar);
+            const newProduct = req.body;
+            const products = await productCollection.insertOne(newProduct);
             res.send(products);
         });
 
-        // // get all order
+        // delete
+        app.delete('/product/:id', verifyJWT, async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const product = await productCollection.deleteOne(query);
+            res.send(product);
+        });
+
+
+        // get all order
         app.get('/order', verifyJWT, async (req, res) => {
             const orders = await orderCollection.find().toArray();
             res.send(orders.reverse());
@@ -93,8 +102,8 @@ async function run() {
         app.delete('/order/:id', verifyJWT, async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
-            const orders = await orderCollection.deleteOne(query);
-            res.send(orders);
+            const order = await orderCollection.deleteOne(query);
+            res.send(order);
         });
 
         // get all users
@@ -103,6 +112,13 @@ async function run() {
             res.send(users.reverse());
         });
 
+        // get user by email
+        app.get('/user/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email: email };
+            const user = await userCollection.findOne(query);
+            res.send(user);
+        });
 
         app.get('/admin/:email', verifyJWT, async (req, res) => {
             const email = req.params.email;
@@ -129,7 +145,6 @@ async function run() {
             }
         });
 
-
         // put users
         app.put('/user/:email', async (req, res) => {
             const email = req.params.email;
@@ -155,13 +170,6 @@ async function run() {
 run().catch(console.dir);
 
 
-
-
-
-
-
-
-
 app.get('/', (req, res) => {
     res.send('Hello from AC||DC')
 });
@@ -169,3 +177,19 @@ app.get('/', (req, res) => {
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
 });
+
+
+
+
+
+
+// const verifyAdmin = async (req, res, next) => {
+//     const requester = req.decoded.email;
+//     const requesterAccount = await userCollection.findOne({ email: requester });
+//     if (requesterAccount.role === 'admin') {
+//         next();
+//     }
+//     else {
+//         res.status(403).send({ message: 'Forbidden access' });
+//     }
+// }
