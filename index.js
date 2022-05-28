@@ -38,6 +38,7 @@ async function run() {
         const productCollection = client.db("ac-dc").collection("products");
         const orderCollection = client.db("ac-dc").collection("orders");
         const userCollection = client.db("ac-dc").collection("users");
+        const reviewCollection = client.db("ac-dc").collection("reviews");
 
         // all products API
         app.get('/product', async (req, res) => {
@@ -58,8 +59,8 @@ async function run() {
         // add product
         app.post('/product', async (req, res) => {
             const newProduct = req.body;
-            const products = await productCollection.insertOne(newProduct);
-            res.send(products);
+            const product = await productCollection.insertOne(newProduct);
+            res.send(product);
         });
 
         // delete
@@ -157,6 +158,23 @@ async function run() {
             const result = await userCollection.updateOne(filter, updateDoc, options);
             const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '3000h' })
             res.send({ result, token });
+
+
+            // grt review
+            app.get('/review', verifyJWT, async (req, res) => {
+                const query = {};
+                const cursor = reviewCollection.find(query);
+                const reviews = await cursor.toArray();
+                res.send(reviews.reverse());
+            });
+
+            // add review
+            app.post('/review', verifyJWT, async (req, res) => {
+                const newReview = req.body;
+                const review = await reviewCollection.insertOne(newReview);
+                res.send(review);
+            });
+
         });
 
 
