@@ -71,6 +71,21 @@ async function run() {
             res.send(product);
         });
 
+        // grt review
+        app.get('/review', async (req, res) => {
+            const query = {};
+            const cursor = reviewCollection.find(query);
+            const reviews = await cursor.toArray();
+            res.send(reviews.reverse());
+        });
+
+        // add review
+        app.post('/review', verifyJWT, async (req, res) => {
+            const newReview = req.body;
+            const review = await reviewCollection.insertOne(newReview);
+            res.send(review);
+        });
+
 
         // get all order
         app.get('/order', verifyJWT, async (req, res) => {
@@ -159,21 +174,6 @@ async function run() {
             const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '3000h' })
             res.send({ result, token });
 
-
-            // grt review
-            app.get('/review', verifyJWT, async (req, res) => {
-                const query = {};
-                const cursor = reviewCollection.find(query);
-                const reviews = await cursor.toArray();
-                res.send(reviews.reverse());
-            });
-
-            // add review
-            app.post('/review', verifyJWT, async (req, res) => {
-                const newReview = req.body;
-                const review = await reviewCollection.insertOne(newReview);
-                res.send(review);
-            });
 
         });
 
