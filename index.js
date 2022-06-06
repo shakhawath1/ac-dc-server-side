@@ -114,7 +114,7 @@ async function run() {
             res.send({ success: true, result });
         });
 
-        // delete
+        // delete order
         app.delete('/order/:id', verifyJWT, async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
