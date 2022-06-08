@@ -2,9 +2,9 @@
 
 ## [Live Website Link](https://ac-dc-6da0a.web.app/)
 
-Private client-side repository link: [ https://github.com/programming-hero-web-course1/manufacturer-website-client-side-shakhawath1]( https://github.com/programming-hero-web-course1/manufacturer-website-client-side-shakhawath1)
+Private client-side repository link: [https://github.com/shakhawath1/ac-dc-client-side](https://github.com/shakhawath1/ac-dc-client-side)
 
-Private server-side repository link: [https://github.com/programming-hero-web-course1/manufacturer-website-server-side-shakhawath1](https://github.com/programming-hero-web-course1/manufacturer-website-server-side-shakhawath1)
+Private server-side repository link: [https://github.com/shakhawath1/ac-dc-server-side](https://github.com/shakhawath1/ac-dc-server-side)
 
 ## Description
 This is an website of an electronics components manufacturer.
